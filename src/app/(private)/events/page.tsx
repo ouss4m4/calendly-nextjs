@@ -19,6 +19,7 @@ import Link from 'next/link';
 
 import React from 'react';
 
+export const revalidate = 0;
 export default async function EventsPage() {
   const { userId } = await auth();
   if (userId == null) return RedirectToSignIn({});

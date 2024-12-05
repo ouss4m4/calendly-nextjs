@@ -17,19 +17,49 @@ import { Button } from '../ui/button';
 import Link from 'next/link';
 import { Textarea } from '../ui/textarea';
 import { Switch } from '../ui/switch';
-import { createEvent } from '@/app/server/actions/events';
+import {
+  createEvent,
+  deleteEvent,
+  updateEvent,
+} from '@/app/server/actions/events';
+import {
+  AlertDialog,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '../ui/alert-dialog';
 
-export default function EventForms() {
+import { useTransition } from 'react';
+
+export default function EventForms({
+  event,
+}: {
+  event?: {
+    id: string;
+    name: string;
+    description?: string;
+    durationInMinutes: number;
+    isActive: boolean;
+  };
+}) {
+  const [isDeletePending, startDeleteTransition] = useTransition();
   const form = useForm<z.infer<typeof eventsFormSchema>>({
     resolver: zodResolver(eventsFormSchema),
-    defaultValues: {
+    defaultValues: event || {
       isActive: true,
       durationInMinutes: 30,
     },
   });
 
   async function onSubmit(values: z.infer<typeof eventsFormSchema>) {
-    const data = await createEvent(values);
+    const action =
+      event == null ? createEvent : updateEvent.bind(null, event.id);
+    const data = await action(values);
     if (data && data.error) {
       form.setError('root', { message: 'an error happened, please try again' });
     }
@@ -110,6 +140,47 @@ export default function EventForms() {
           )}
         />
         <div className="flex justify-end gap-2">
+          {event && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructiveGhost"
+                  disabled={form.formState.isSubmitting || isDeletePending}
+                >
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogDescription>
+                  This is an irreversible action
+                </AlertDialogDescription>
+                <AlertDialogFooter className="flex gap-2">
+                  <AlertDialogCancel asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={isDeletePending || form.formState.isSubmitting}
+                    variant="destructive"
+                    onClick={() =>
+                      startDeleteTransition(async () => {
+                        const data = await deleteEvent(event.id);
+                        if (data?.error) {
+                          form.setError('root', {
+                            message: 'There was an error deleting your event',
+                          });
+                        }
+                      })
+                    }
+                  >
+                    Save
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <Button asChild variant="outline" type="button">
             <Link href="/events">Cancel</Link>
           </Button>
