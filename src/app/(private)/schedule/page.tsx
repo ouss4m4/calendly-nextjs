@@ -4,12 +4,14 @@ import { db } from '@/drizzle/db';
 import { auth } from '@clerk/nextjs/server';
 import React from 'react';
 
+export const revalidate = 0;
+
 export default async function SchedulePage() {
   const { userId, redirectToSignIn } = await auth();
   if (!userId) redirectToSignIn();
 
   const schedule = await db.query.ScheduleTable.findFirst({
-    where: ({ clerkUserId }, { eq }) => eq(clerkUserId, userId),
+    where: (columns, { eq }) => eq(columns.clerkUserId, userId),
     with: { availabilities: true },
   });
 
