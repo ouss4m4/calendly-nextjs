@@ -8,11 +8,13 @@ export default async function SchedulePage() {
   const { userId, redirectToSignIn } = await auth();
   if (!userId) redirectToSignIn();
 
-  const schedule = db.query.ScheduleTable.findFirst({
-    where: ({ id, clerkUserId }, { eq }) => eq(clerkUserId, id),
+  const schedule = await db.query.ScheduleTable.findFirst({
+    where: ({ clerkUserId }, { eq }) => eq(clerkUserId, userId),
     with: { availabilities: true },
   });
 
+  console.log('-------------------');
+  console.log(schedule);
   return (
     <Card className="mx-auto max-w-md">
       <CardHeader>

@@ -22,7 +22,6 @@ export default async function EditEventPage({
   });
   if (event == null) return notFound();
 
-  console.log(event);
   return (
     <Card className="mx-auto max-w-md">
       <CardHeader>
