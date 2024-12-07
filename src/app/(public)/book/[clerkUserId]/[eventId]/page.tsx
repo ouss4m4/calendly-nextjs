@@ -1,3 +1,4 @@
+import { MeetingForm } from '@/components/forms/MeetingForm';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -55,8 +56,7 @@ export default async function BookEventPage({
     eachMinuteOfInterval({ start: startDate, end: endDate }, { step: 15 }),
     { clerkUserId, durationInMinutes: event.durationInMinutes }
   );
-  console.log('-0------1111---');
-  console.log(validTimes);
+
   if (validTimes.length == 0) {
     return <NoTimeSlots event={event} calendarUser={calendarUser} />;
   }
@@ -72,11 +72,11 @@ export default async function BookEventPage({
         )}
       </CardHeader>
       <CardContent>
-        {/* <MeetingForm
+        <MeetingForm
           validTimes={validTimes}
           eventId={event.id}
           clerkUserId={clerkUserId}
-        /> */}
+        />
       </CardContent>
     </Card>
   );
